@@ -1,5 +1,7 @@
-<div class="post">
-  <h2>Post title</h2>
-  <p>;sad;da; ; daslds'al; d;sal'dlsa;</p>
-</div>
+<div class="card">
+  <h2>{{post.title}}</h2>
+  <p>{{post.text}}</p>
 
+  <button class="btn" (click)="removePost()">&times;</button>
+  <ng-content></ng-content>
+</div>
