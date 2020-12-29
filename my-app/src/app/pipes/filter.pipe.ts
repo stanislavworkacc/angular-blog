@@ -2,17 +2,20 @@ import { Pipe, PipeTransform } from '@angular/core';
 import {Post} from '../app.component';
 
 @Pipe({
-  name: 'filter'
+  name: 'filter',
+  pure: false
 })
+
 export class FilterPipe implements PipeTransform {
 
   transform(posts: Post[], search: string = '', field: string = 'title'): Post[] {
     if(!search.trim()) {
       return posts;
     }
-
+    console.log(posts)
     return posts.filter(post => {
-      return post[field].title.toLowerCase().includes(search.toLowerCase())
+      console.log(post[field]);
+      return post[field].toLowerCase().includes(search.toLowerCase())
     });
   }
 

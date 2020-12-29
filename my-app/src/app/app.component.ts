@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {Observable} from 'rxjs';
 
 export interface Post {
   title: string;
@@ -11,14 +12,18 @@ export interface Post {
   styleUrls: ['./app.component.scss']
 })
 
-export class AppComponent {
+export class AppComponent{
 
-  search = '';
-  searchField = 'title';
+  promise: Promise<string> = new Promise<string>( (resolve) => {
+    setTimeout(() => {
+      resolve('Promise Resolve');
+    }, 4000);
+  });
 
-  posts : Post[] = [
-    {title: 'Beer', text: 'Самое лутшее пиво в мире'},
-    {title: 'breed', text: 'the best bread in the world'},
-    {title: 'JavaScript', text: 'the best language in the world'},
-  ]
+
+  myDate: Observable<Date> = new Observable( obs => {
+    setInterval(() => {
+      obs.next(new Date());
+    }, 1000);
+  });
 }
