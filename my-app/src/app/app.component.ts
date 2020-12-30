@@ -1,6 +1,12 @@
 import {Component, OnInit} from '@angular/core'
-import {FormArray, FormControl, FormGroup, Validators} from '@angular/forms'
-import {MyValidator} from './my.validator';
+import {HttpClient} from '@angular/common/http'
+import {delay} from 'rxjs/operators'
+
+export interface Todo {
+  completed: boolean
+  title: string
+  id?: number
+}
 
 @Component({
   selector: 'app-root',
@@ -8,53 +14,52 @@ import {MyValidator} from './my.validator';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  form: FormGroup
+
+  todos: Todo[] = []
+
+  loading = false
+
+  todoTitle = ''
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.form = new FormGroup({
-      email: new FormControl('', [
-        Validators.email,
-        Validators.required,
-        MyValidator.restrictedEmails
-      ], MyValidator.uniqEmail),
-      password: new FormControl(null, [
-        Validators.required,
-        Validators.minLength(6)
-      ]),
-      address: new FormGroup({
-        country: new FormControl('by'),
-        city: new FormControl('Минск', Validators.required)
-      }),
-      skills: new FormArray([])
-    })
+    this.fetchTodos()
   }
 
-  submit() {
-    if (this.form.valid) {
-      console.log('Form: ', this.form)
-      const formData = {...this.form.value}
-      console.log('Form Data:', formData);
-      this.form.reset()
-    }
-  }
-
-  setCapital() {
-    const cityMap = {
-      ru: 'Москва',
-      ua: 'Киев',
-      by: 'Минск'
+  addTodo() {
+    if (!this.todoTitle.trim()) {
+      return
     }
 
-    const cityKey = this.form.get('address').get('country').value
-    const city = cityMap[cityKey]
+    const newTodo: Todo = {
+      title: this.todoTitle,
+      completed: false
+    }
 
-    this.form.patchValue({address: {city}})
+    this.http.post<Todo>('https://jsonplaceholder.typicode.com/todos', newTodo)
+      .subscribe(todo => {
+        this.todos.push(todo)
+        this.todoTitle = ''
+      })
+
   }
 
-  addSkill() {
-    const control = new FormControl('', Validators.required);
-    // (<FormArray>this.form.get('skills'))
-    (this.form.get('skills') as FormArray).push(control)
+  fetchTodos() {
+    this.loading = true
+    this.http.get<Todo[]>('https://jsonplaceholder.typicode.com/todos?_limit=2')
+      .pipe(delay(1500))
+      .subscribe(todos => {
+        this.todos = todos
+        this.loading = false
+      })
   }
+
+    removeTodo(id: number) {
+        this.http.delete<void>(`https://jsonplaceholder.typicode.com/todos/${id}`)
+            .subscribe(() => {
+              this.todos = this.todos.filter(t => t.id !== id)
+            })
+    }
 }
 
